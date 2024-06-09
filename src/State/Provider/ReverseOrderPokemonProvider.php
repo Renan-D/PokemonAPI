@@ -14,6 +14,12 @@ class ReverseOrderPokemonProvider implements ProviderInterface
 
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {
+        $name = $context['filters']['name'] ?? null;
+
+        if ($name !== null) {
+            return $this->pokemonRepository->findByName($name);
+        }
+
         return $this->pokemonRepository->findBy([], ['nationalNumber' => 'DESC']);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -36,6 +38,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
     normalizationContext: ["groups" => ["moves_read"]],
     denormalizationContext: ["groups" => ["moves_write"]]
 )]
+#[ApiFilter(SearchFilter::class, properties: ['name' => 'exact'])] // Attention ce filtre ne fonctionnera pas avec une route custom getCollection (il faudra faire le filtre à la main et l'intégrer dans la réponse comme je le fais pour Pokemon)
 class Move
 {
     #[ORM\Id]

@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use App\Controller\CountPokemonController;
 use App\Repository\PokemonRepository;
 use App\State\Processor\CreatePokemonProcessor;
@@ -51,6 +53,8 @@ use Symfony\Component\Validator\Constraints as Assert;
     denormalizationContext: ["groups" => ["pokemons_write"]],
     // order: ['nationalNumber' => 'ASC'] // Cette ligne peut remplacer le traitement dans le provider ReverseOrderPokemonProvider
 )]
+
+#[ApiFilter(SearchFilter::class, properties: ['name' => 'exact'])]
 class Pokemon
 {
     #[ORM\Id]
