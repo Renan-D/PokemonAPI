@@ -36,6 +36,11 @@ Vous avez un fichier SQL dans le dossier sql pour insérer quelques pokemons de 
 
 https://getcomposer.org/download/
 
+Puis entrer cette commande à la racine du projet
+```bash
+$ composer install
+```
+
 ### Installation XAMPP
 
 Installer XAMPP https://www.apachefriends.org/download.html.
