@@ -2,13 +2,40 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Repository\MoveRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: MoveRepository::class)]
+#[ApiResource(
+    operations: [
+        new Get(
+            uriTemplate: '/{id}',
+            requirements: ['id' => '\d+'],
+        ),
+        new GetCollection(
+            uriTemplate: '/',
+        ),
+        new Patch(
+            uriTemplate: '/{id}',
+            requirements: ['id' => '\d+'],
+        ),
+        new Post(
+            uriTemplate: '',
+        )
+    ],
+    routePrefix: '/moves',
+    normalizationContext: ["groups" => ["moves_read"]],
+    denormalizationContext: ["groups" => ["moves_write"]]
+)]
 class Move
 {
     #[ORM\Id]
@@ -17,36 +44,47 @@ class Move
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["moves_read", "moves_write"])]
     private ?string $name = null;
 
     #[ORM\Column]
+    #[Groups(["moves_read", "moves_write"])]
     private ?int $number = null;
 
     #[ORM\Column(length: 2)]
+    #[Groups(["moves_read", "moves_write"])]
     private ?string $classification = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["moves_read", "moves_write"])]
     private ?string $type = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["moves_read", "moves_write"])]
     private ?string $category = null;
 
     #[ORM\Column]
+    #[Groups(["moves_read", "moves_write"])]
     private ?int $power = null;
 
     #[ORM\Column]
+    #[Groups(["moves_read", "moves_write"])]
     private ?int $accuracy = null;
 
     #[ORM\Column]
+    #[Groups(["moves_read", "moves_write"])]
     private ?int $maxPP = null;
 
     #[ORM\Column]
+    #[Groups(["moves_read", "moves_write"])]
     private ?int $currentPP = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(["moves_read", "moves_write"])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["moves_read", "moves_write"])]
     private ?string $effect = null;
 
     /**

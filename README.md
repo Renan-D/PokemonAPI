@@ -35,6 +35,33 @@ Par défaut le login est root et il n'y a pas de mot de passe, ce qui explique c
 DATABASE_URL="mysql://root:@127.0.0.1:3306/PokemonAPI?serverVersion=8.0.32&charset=utf8mb4"
 ```
 
+## Fichier de configuration
+
+### config/packages/api_platform.yaml
+
+Ajouter le format json 
+
+```yaml
+api_platform:
+  title: Hello API Platform
+  version: 1.0.0
+  formats:
+    jsonld: ['application/ld+json']
+    json: ['application/json']
+  docs_formats:
+    jsonld: ['application/ld+json']
+    jsonopenapi: ['application/vnd.openapi+json']
+    html: ['text/html']
+  defaults:
+    stateless: true
+    cache_headers:
+      vary: ['Content-Type', 'Authorization', 'Origin']
+    extra_properties:
+      standard_put: true
+      rfc_7807_compliant_errors: true
+  keep_legacy_inflector: false
+  use_symfony_listeners: true
+```
 
 
 © 2024 Tous droits réservés - DECLERCQ Renan

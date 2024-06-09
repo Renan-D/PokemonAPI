@@ -2,7 +2,10 @@
 
 namespace App\Entity;
 
+use App\Controller\CountPokemonController;
 use App\Repository\PokemonRepository;
+use App\State\Processor\CreatePokemonProcessor;
+use App\State\Provider\ReverseOrderPokemonProvider;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -13,6 +16,8 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 #[ORM\Entity(repositoryClass: PokemonRepository::class)]
 #[ApiResource(
@@ -23,18 +28,28 @@ use Symfony\Component\Serializer\Attribute\Groups;
         ),
         new GetCollection(
             uriTemplate: '/',
+            provider: ReverseOrderPokemonProvider::class
+        ),
+        new Get(
+            uriTemplate: '/count',
+            controller: countPokemonController::class,
+            read: false
         ),
         new Patch(
             uriTemplate: '/{id}',
             requirements: ['id' => '\d+'],
+            security: 'is_granted("ROLE_ADMIN") === true',
         ),
         new Post(
             uriTemplate: '',
+            security: 'is_granted("ROLE_USER") === true',
+            processor: CreatePokemonProcessor::class
         )
     ],
     routePrefix: '/pokemons',
     normalizationContext: ["groups" => ["pokemons_read"]],
-    denormalizationContext: ["groups" => ["pokemons_write"]]
+    denormalizationContext: ["groups" => ["pokemons_write"]],
+    // order: ['nationalNumber' => 'ASC'] // Cette ligne peut remplacer le traitement dans le provider ReverseOrderPokemonProvider
 )]
 class Pokemon
 {
@@ -45,14 +60,21 @@ class Pokemon
 
     #[ORM\Column]
     #[Groups(["pokemons_read", "pokemons_write"])]
+    #[Assert\Range(notInRangeMessage: "Only 1st generation pokemon 1-151", min: 1, max: 151)]
     private ?int $nationalNumber = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(["pokemons_read", "pokemons_write"])]
     private ?string $name = null;
 
-    #[ORM\Column(type: Types::ARRAY)]
+    #[ORM\Column]
     #[Groups(["pokemons_read", "pokemons_write"])]
+    #[Assert\NotBlank]
+    #[Assert\Count(min: 1, max: 2)]
+    #[Assert\All([
+        new Assert\Choice(['choices' => ['Fire', 'Water', 'Grass', 'Electric', 'Ice', 'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug', 'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy']],
+            message: "Invalid type, types must be Fire, Water, Grass, Electric, Ice, Fighting, Poison, Ground, Flying, Psychic, Bug, Rock, Ghost, Dragon, Dark, Steel"),
+    ])]
     private array $types = [];
 
     #[ORM\Column]
@@ -64,7 +86,7 @@ class Pokemon
     private ?int $maxHP = null;
 
     #[ORM\Column]
-    #[Groups(["pokemons_read", "pokemons_write"])]
+    #[Groups(["pokemons_read"])]
     private ?int $currentHP = null;
 
     #[ORM\Column]
@@ -84,18 +106,30 @@ class Pokemon
     private ?string $description = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(["pokemons_read", "pokemons_write"])]
+    #[Groups(["pokemons_read"])]
     private ?string $sprite = null;
 
     /**
      * @var Collection<int, Move>
      */
     #[ORM\ManyToMany(targetEntity: Move::class, mappedBy: 'pokemons')]
+    #[Groups(["pokemons_read", "pokemons_write", "moves_read", "moves_write"])]
     private Collection $moves;
+
+    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'evolutions')]
+    #[Groups(["pokemons_write"])]
+    private ?self $preEvolution = null;
+
+    /**
+     * @var Collection<int, self>
+     */
+    #[ORM\OneToMany(targetEntity: self::class, mappedBy: 'preEvolution')]
+    private Collection $evolutions;
 
     public function __construct()
     {
         $this->moves = new ArrayCollection();
+        $this->evolutions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -257,6 +291,48 @@ class Pokemon
     {
         if ($this->moves->removeElement($move)) {
             $move->removePokemon($this);
+        }
+
+        return $this;
+    }
+
+    public function getPreEvolution(): ?self
+    {
+        return $this->preEvolution;
+    }
+
+    public function setPreEvolution(?self $preEvolution): static
+    {
+        $this->preEvolution = $preEvolution;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, self>
+     */
+    public function getEvolutions(): Collection
+    {
+        return $this->evolutions;
+    }
+
+    public function addEvolution(self $evolution): static
+    {
+        if (!$this->evolutions->contains($evolution)) {
+            $this->evolutions->add($evolution);
+            $evolution->setPreEvolution($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEvolution(self $evolution): static
+    {
+        if ($this->evolutions->removeElement($evolution)) {
+            // set the owning side to null (unless already changed)
+            if ($evolution->getPreEvolution() === $this) {
+                $evolution->setPreEvolution(null);
+            }
         }
 
         return $this;
