@@ -26,6 +26,10 @@ A partir de ce code, vous ouvez maintenant
 - Accepter les générations supérieures à la première (Il faudra changer la contrainte de validation de nationalNumber dans l'entité Pokemon et faire attention avec le service CreatePokemonProcessor qui ne fonctionne que pour les Pokemon 1ere gen)
 ...
 
+## Données
+
+Vous avez un fichier SQL dans le dossier sql pour insérer quelques pokemons de test dans votre base de données. 
+
 ## Prérequis
 
 ### Installer composer 
