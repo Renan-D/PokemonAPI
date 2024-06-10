@@ -13,11 +13,11 @@ Notions retrouvés dans le code :
 - Processor / Provider / Controller (CountPokemonController, ReverseOrderPokemonProvider, CreatePokemonProcessor)
 - Service (PokemonService)
 - Contrainte de validation (Assert\Range, Assert\Count, Assert\NotBlank, Assert\All, Assert\Choice ...)
-- Authentification JWT (
+- Authentification JWT 
 - Filter avec API Platform pour une route non custom (Disponible dans l'entité Move)
 - Filter avec Doctrine pour une route custom (PokemonRepository)
 
-A partir de ce code, vous ouvez maintenant 
+A partir de ce code, vous pouvez maintenant :
 - Compléter l'entité Move et pourquoi pas différencier les CT des CS (TM & HM en anglais)
 - Ajouter des entités comme Trainer 
 - Ajouter des contraintes de validation
@@ -29,6 +29,14 @@ A partir de ce code, vous ouvez maintenant
 ## Données
 
 Vous avez un fichier SQL dans le dossier sql pour insérer quelques pokemons de test dans votre base de données. 
+
+## Conseil avant de démarrer
+
+Consultez la documentation de Symfony et d'API Platform, qui sont toutes deux très bien réalisées. Profitez-en pleinement !
+
+https://symfony.com/doc/current/index.html
+
+https://api-platform.com/docs/core/
 
 ## Prérequis
 
